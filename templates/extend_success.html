@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>✅ 연장 완료</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f6f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+    }
+
+    .card {
+      background: #fff;
+      padding: 50px 80px;
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+      color: #001B4E;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    a.btn {
+      background-color: #1557c0;
+      color: #fff;
+      padding: 12px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    a.btn:hover {
+      background-color: #003b95;
+      transform: translateY(-2px);
+    }
+
+    /* ✅ 상하단 네이비 라인 */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>✅ {{ extend_hours }}시간 연장되었습니다!</h2>
+    <p>추가 연장은 종료 20분 전부터 다시 가능합니다.<br>이용을 계속 진행해주세요.</p>
+    <a href="{{ url_for('index') }}" class="btn">홈으로 가기</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>

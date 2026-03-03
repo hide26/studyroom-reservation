@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>문의사항</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      background: linear-gradient(180deg, #f7f9fc 0%, #eef3ff 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .card {
+      background: white;
+      padding: 60px 80px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      text-align: center;
+      transition: 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      color: #001B4E;
+      font-size: 22px;
+      margin-bottom: 30px;
+      letter-spacing: -0.3px;
+    }
+
+    .circle-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 15px;
+      color: white;
+      text-decoration: none;
+      transition: 0.3s ease;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    }
+
+    .circle.kakao {
+      background-color: #FEE500;
+      color: #3C1E1E;
+      border: 3px solid #f7da00;
+    }
+
+    .circle.kakao:hover {
+      background-color: #fff066;
+      transform: translateY(-4px);
+    }
+
+    .circle.instagram {
+      background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+    }
+
+    .circle.instagram:hover {
+      opacity: 0.9;
+      transform: translateY(-4px);
+    }
+
+    .info {
+      margin-top: 20px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #333;
+    }
+
+    .info strong {
+      color: #001B4E;
+    }
+
+    a.home {
+      display: block;
+      margin-top: 26px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    a.home:hover {
+      text-decoration: underline;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>문의사항 채널</h2>
+
+    <div class="circle-buttons">
+      <a href="https://pf.kakao.com/_exlnjxb" target="_blank" class="circle kakao">
+        카카오톡
+      </a>
+      <a href="https://www.instagram.com/hongik_hide_2025" target="_blank" class="circle instagram">
+        인스타그램
+      </a>
+    </div>
+
+    <div class="info">
+      <p><strong>제 37대 산업데이터공학과 학생회 [FoR]</strong></p>
+      <p>학생회장: <strong>이승훈</strong> (010-7412-1161)<br>
+      부학생회장: <strong>최윤선</strong> (010-2616-8684)</p>
+    </div>
+
+    <a href="/" class="home">← 메인으로 돌아가기</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>

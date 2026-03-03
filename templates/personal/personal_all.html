@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>개인석 전체 예약 현황</title>
+  <style>
+    body { font-family: 'Noto Sans KR', sans-serif; background:#f7f9fc; margin:0; }
+    header { background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.05); padding:16px 24px; position:sticky; top:0; z-index:10; }
+    h1 { margin:0; color:#00205B; font-size:22px; }
+    .grid { display:grid; grid-template-columns: repeat(1, 1fr); gap:16px; padding:20px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1300px){ .grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .seat-card { background:#fff; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,0.06); padding:16px 16px 8px; }
+    .seat-title { margin:0 0 8px; color:#00205B; }
+    .calendar { overflow-x:auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #eaeef5; padding:8px 10px; text-align:center; font-size:13px; }
+    th { background:#f2f6ff; color:#1b2b50; position:sticky; top:0; z-index:1; }
+    .hour-cell { font-weight:600; color:#3b4a6b; background:#f9fbff; }
+    .reserved { background:#ffebe6; color:#9c3a2f; border-radius:8px; }
+    .owner { font-size:11px; opacity:0.85; display:block; margin-top:4px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>개인석(1~7) 예약 현황 – 최근 3일</h1>
+</header>
+
+<div class="grid">
+  {% for seat_num, data in seats.items() %}
+  <div class="seat-card">
+    <h2 class="seat-title">개인석 {{ seat_num }}번</h2>
+    <div class="calendar">
+      <table>
+        <thead>
+          <tr>
+            <th>시간</th>
+            {% for d in days %}
+              <th>{{ d }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in hours %}
+          <tr>
+            <td class="hour-cell">{{ h }}시</td>
+            {% for d in days %}
+              {% set is_reserved = h in data.reserved[d] %}
+              <td class="{{ 'reserved' if is_reserved else '' }}">
+                {% if is_reserved %}
+                  예약됨
+                  {% set key = (d, h) %}
+                  {% if key in data.owners %}
+                    <span class="owner">{{ data.owners[key] }}</span>
+                  {% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:right; margin:8px 2px 0 0;">
+      <a href="/personal_detail?seat={{ seat_num }}">자세히 보기 &raquo;</a>
+    </p>
+  </div>
+  {% endfor %}
+</div>
+</body>
+</html>

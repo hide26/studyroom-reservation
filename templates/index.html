@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>산업·데이터공학과 스터디룸 예약</title>
+    <style>
+      /* 기본 리셋 */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background-color: #f9fafc;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #001b4e;
+      }
+
+      /* 상하 남색 라인 (고정) */
+      body::before,
+      body::after {
+        content: "";
+        height: 30px;
+        width: 100%;
+        background: linear-gradient(to right, #001b4e, #003c9e, #001b4e);
+        position: fixed;
+        left: 0;
+        z-index: 9999;
+      }
+      body::before {
+        top: 0;
+      }
+      body::after {
+        bottom: 0;
+      }
+
+      /* 페이지 중앙 컨테이너 */
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      header {
+        text-align: center;
+      }
+      header img.logo {
+        width: 320px;
+        max-width: 40vw;
+        margin-bottom: 8px;
+      }
+      h3.kor-title {
+        font-size: 40px;
+        margin: 6px 0 0;
+        font-weight: 700;
+        color: #001b4e;
+      }
+      h1 {
+        font-size: 50px;
+        margin: 20px 0 24px;
+        font-weight: 800;
+        color: #001b4e;
+        line-height: 1.2;
+      }
+
+      /* 마스코트 */
+      .mascot-wrap {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        margin: 0 auto;
+      }
+
+      img.mascot {
+        width: 200px;
+        max-width: 36vw;
+        filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.12));
+        position: relative;
+        top: 1px;
+        z-index: 3;
+      }
+
+      /* 버튼 전체 섹션 */
+      .button-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 36px;
+        margin-top: 0px;
+      }
+
+      /* 상단 큰 버튼 (단체석 / 개인석) */
+      .big-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 80px;
+        flex-wrap: wrap;
+      }
+
+      .big-buttons a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background-color: #003c9e;
+        color: #fff;
+        font-size: 26px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .big-buttons a::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.286),
+          transparent 70%
+        );
+        transform: scale(0);
+        transition: transform 0.3s ease;
+      }
+
+      .big-buttons a:hover {
+        transform: translateY(-6px);
+        background-color: #001b4e;
+      }
+
+      .big-buttons a:hover::after {
+        transform: scale(1);
+      }
+
+      /* 하단 버튼 (작은 네모 버튼들) */
+      .small-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+      }
+
+      .small-buttons a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 130px;
+        height: 50px;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
+      }
+
+      .small-buttons a.green {
+        background-color: #27ae60;
+      }
+      .small-buttons a.blue {
+        background-color: #1565c0;
+      }
+      .small-buttons a.red {
+        background-color: #c62828;
+      }
+      .small-buttons a.yellow {
+        background-color: #ffd700;
+        color: #00205b;
+      }
+
+      .small-buttons a:hover {
+        transform: translateY(-3px);
+        filter: brightness(1.1);
+      }
+
+      /* 영어 푸터 */
+      .eng-footer {
+        position: fixed;
+        bottom: 2px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 20px;
+        color: white;
+        z-index: 10000;
+        pointer-events: none;
+      }
+
+      /* ✅ 반응형 (모바일만 변경, 웹은 그대로 유지) */
+      @media (max-width: 768px) {
+        header img.logo {
+          width: 240px;
+        }
+        h3.kor-title {
+          font-size: 30px;
+        } /* 글씨 살짝 키움 */
+        h1 {
+          font-size: 38px;
+        } /* 글씨 살짝 키움 */
+        img.mascot {
+          width: 140px;
+        }
+
+        .button-section {
+          gap: 24px;
+        }
+
+        /* ✅ 단체석/개인석 가로 정렬 */
+        .big-buttons {
+          flex-direction: row;
+          justify-content: center;
+          gap: 28px;
+        }
+
+        .big-buttons a {
+          width: 150px;
+          height: 150px;
+          font-size: 20px;
+        }
+
+        .small-buttons a {
+          width: 100px;
+          height: 40px;
+          font-size: 14px;
+        }
+
+        /* ✅ 영어 푸터 */
+        .eng-footer {
+          font-size: 12px;
+          bottom: 6px;
+          white-space: nowrap;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <header>
+        <img
+          src="{{ url_for('static', filename='hongik_logo.png') }}"
+          alt="홍익대학교 로고"
+          class="logo"
+        />
+        <h3 class="kor-title">산업·데이터공학과</h3>
+        <h1>스터디룸 예약</h1>
+      </header>
+
+      <div class="mascot-wrap">
+        <img
+          src="{{ url_for('static', filename='wow.png') }}"
+          alt="학과 마스코트"
+          class="mascot"
+        />
+      </div>
+
+      <!-- 버튼 전체 -->
+      <div class="button-section">
+        <!-- 큰 버튼 -->
+        <div class="big-buttons">
+          <a href="{{ url_for('room_detail') }}?room=1">단체</a>
+          <a href="{{ url_for('personal_detail') }}?seat=1">개인</a>
+        </div>
+
+        <!-- 작은 버튼 -->
+        <div class="small-buttons">
+          <a href="{{ url_for('contact') }}" class="green">문의사항</a>
+          <a href="https://203.249.68.52/" target="_blank" class="blue">냉/난방</a>
+          <a href="{{ url_for('cancel_all') }}" class="red">예약 취소</a>
+          <a href="{{ url_for('extend_page') }}" class="yellow">시간 연장</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="eng-footer">
+      Industrial &amp; Data Engineering, Hongik University
+    </div>
+  </body>
+</html>

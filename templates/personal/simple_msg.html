@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 60px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      width: 460px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: #001B4E;
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .check {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #555;
+      font-size: 15px;
+      margin-top: 8px;
+      margin-bottom: 25px;
+    }
+
+    button {
+      background: #1557c0;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0d47a1;
+      transform: translateY(-2px);
+    }
+
+    ul.notice {
+      text-align: left;
+      margin: 20px 0 10px 0;
+      padding-left: 20px;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.6;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      background: #fafbfd;
+      padding: 15px 25px;
+      border-radius: 10px;
+    }
+
+    ul.notice li {
+      margin-bottom: 6px;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">✅</div>
+    <h2>{{ title }}</h2>
+    <p>{{ message }}</p>
+
+    <ul class="notice">
+      <li>🍽️ 취식불가 — 간단한 간식 및 음료만 허용됩니다.</li>
+      <li>⏰ 사용 시간을 연장하려면 <strong>20분 전</strong>부터 반드시 미리 연장 신청을 해주세요.</li>
+      <li>🧹 다음 예약이 있을 경우, 종료 <strong>5분 전</strong>까지 공간을 깨끗하게 정리해주세요.</li>
+      <li>🔇 시끄러울 정도의 대화는 금지됩니다.</li>
+    </ul>
+
+    <form action="{{ back_url }}">
+      <button type="submit">돌아가기</button>
+    </form>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>

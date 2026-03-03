@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>개인석 {{ seat }} 예약</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      background: #f7f9fc;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      padding: 45px 60px;
+      width: 420px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      color: #001B4E;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    p.meta {
+      text-align: center;
+      color: #333;
+      font-size: 15px;
+      margin-top: 0;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+      color: #001B4E;
+      font-size: 15px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 26px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background-color: #1557c0;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+      transform: translateY(-2px);
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back:hover {
+      text-decoration: underline;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>예약 정보 입력</h2>
+    {% if seat %}
+      <p class="meta">▶ 개인석 {{ seat }}, {{ date }} {{ "%02d:00" % hour }} 시작</p>
+    {% else %}
+      <p class="meta">▶ {{ date }} {{ "%02d:00" % hour }} 시작</p>
+    {% endif %}
+
+    <form action="{{ url_for('personal_reserve') }}" method="POST">
+      <input type="hidden" name="seat" value="{{ seat }}">
+      <input type="hidden" name="date" value="{{ date }}">
+      <input type="hidden" name="hour" value="{{ hour }}">
+
+      <label>이름</label>
+      <input type="text" name="leader_name" placeholder="예: 김산데"
+             required pattern="[가-힣]{2,}" title="이름은 한글 2자 이상으로 입력해주세요.">
+
+      <label>학번</label>
+      <input type="text" name="leader_id" placeholder="예: A123456"
+             required pattern="[A-Za-z]{1}[0-9]{6}" title="학번 형식은 A123456과 같이 입력해주세요.">
+
+      <label>전화번호</label>
+      <input type="text" name="leader_phone" placeholder="예: 010-1234-5678"
+             required pattern="^010-[0-9]{4}-[0-9]{4}$" title="전화번호 형식은 010-1234-5678로 입력해주세요.">
+
+      <label>이용시간 (시간 단위, 1~3시간)</label>
+      <select name="duration" required>
+        <option value="1">1시간</option>
+        <option value="2">2시간</option>
+        <option value="3">3시간</option>
+      </select>
+
+      <button type="submit">예약 완료</button>
+    </form>
+
+    <a href="{{ url_for('personal_detail', seat=seat) }}" class="back">← 예약 현황으로</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>

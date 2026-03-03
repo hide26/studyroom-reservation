@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>예약 취소</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      padding: 45px 60px;
+      width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #001B4E;
+      font-weight: 700;
+      margin-bottom: 30px;
+      font-size: 22px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin: 12px 0 6px;
+      font-weight: 600;
+      color: #001B4E;
+      font-size: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #1557c0;
+    }
+
+    button {
+      background-color: #1557c0;
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 0;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 24px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+      transform: translateY(-2px);
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 18px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>예약 취소 (단체=>대표자)</h2>
+    <form method="POST" action="/cancel_all">
+      <label for="leader_name">이름</label>
+      <input type="text" id="leader_name" name="leader_name" placeholder="예: 김산데" required>
+
+      <label for="leader_id">학번</label>
+      <input type="text" id="leader_id" name="leader_id" placeholder="예: A123456" required>
+
+      <label for="leader_phone">전화번호</label>
+      <input type="text" id="leader_phone" name="leader_phone" placeholder="예: 010-0000-0000" required>
+
+      <button type="submit">예약 조회</button>
+    </form>
+
+    <a href="/">← 메인으로 돌아가기</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>

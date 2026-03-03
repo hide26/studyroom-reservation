@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>예약 취소 목록</title>
+  <style>
+    body {
+      font-family:'Noto Sans KR', sans-serif;
+      background:#f7f9fc;
+      margin:0;
+      padding:30px;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    h2 { color:#001B4E; text-align:center; margin-bottom: 20px; }
+
+    table {
+      width:90%;
+      margin:20px auto;
+      border-collapse:collapse;
+      background:white;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border:1px solid #eee;
+      padding:10px;
+      text-align:center;
+      font-size:14px;
+    }
+
+    th { background:#f1f6ff; color:#001B4E; }
+    h3 { text-align:center; color:#001B4E; }
+
+    button {
+      background:#1557c0;
+      color:white;
+      border:none;
+      border-radius:8px;
+      padding:10px 20px;
+      cursor:pointer;
+      font-weight:bold;
+      margin-top:10px;
+      transition: 0.2s;
+    }
+
+    button:hover { background:#0d47a1; transform: translateY(-2px); }
+
+    .msg {
+      text-align:center;
+      color:#555;
+      font-size:15px;
+      margin-top:20px;
+    }
+
+    .bottom-links {
+      text-align:center;
+      margin-top:30px;
+      padding-bottom: 80px;
+    }
+
+    .home-btn {
+      display:inline-block;
+      background:#1557c0;
+      color:white;
+      padding:10px 24px;
+      border-radius:8px;
+      text-decoration:none;
+      font-weight:700;
+      transition:0.2s;
+    }
+
+    .home-btn:hover {
+      background:#0d47a1;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>예약 취소 목록</h2>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul style="list-style:none; padding:0; text-align:center;">
+        {% for msg in messages %}
+          <li style="color:#2e7d32; font-weight:600;">{{ msg|safe }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="/cancel_all_confirm">
+    <!-- ✅ 인증 정보는 숨김 전달 -->
+    <input type="hidden" name="leader_name" value="{{ leader_name }}">
+    <input type="hidden" name="leader_id" value="{{ leader_id }}">
+    <input type="hidden" name="leader_phone" value="{{ leader_phone }}">
+
+    {% if group_reservations %}
+    <h3>📘 단체실 예약</h3>
+    <table>
+      <tr><th>선택</th><th>좌석</th><th>날짜</th><th>시간</th></tr>
+      {% for r in group_reservations %}
+      <tr>
+        <td><input type="checkbox" name="selected" value="group:{{ r.id }}"></td>
+        <td>프로젝트실 {{ r.room }}</td>
+        <td>{{ r.date }}</td>
+        <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if personal_reservations %}
+    <h3>🪑 개인석 예약</h3>
+    <table>
+      <tr><th>선택</th><th>좌석</th><th>날짜</th><th>시간</th></tr>
+      {% for r in personal_reservations %}
+      <tr>
+        <td><input type="checkbox" name="selected" value="personal:{{ r.id }}"></td>
+        <td>개인석 {{ r.seat }}</td>
+        <td>{{ r.date }}</td>
+        <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    <div style="text-align:center;">
+      <button type="submit">선택한 예약 취소</button>
+    </div>
+  </form>
+
+  {% if not group_reservations and not personal_reservations %}
+  <p class="msg">예약 내역이 없습니다.</p>
+  {% endif %}
+
+  <!-- ✅ 하단 홈으로 돌아가기 버튼 -->
+  <div class="bottom-links">
+    <a href="{{ url_for('index') }}" class="home-btn">← 메인으로 돌아가기</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>

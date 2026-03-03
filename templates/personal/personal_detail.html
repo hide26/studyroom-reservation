@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>개인석 {{ seat }} 예약 현황</title>
+<style>
+  :root {
+    --wall-thick: 5px;
+    --wall-gap: 14px;
+    --col-gap: 40px;
+    --row-gap: 16px;
+    --seat-w: 50px;
+    --seat-h: 60px;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+    background: #f7f9fc;
+  }
+
+  /* ✅ 헤더 */
+  header {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 36px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  /* ✅ 메인/문의사항 버튼 */
+  .home-btn, .contact-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: 0.2s;
+  }
+  .home-btn {
+    background: #1565c0;
+    color: white;
+  }
+  .home-btn:hover { background: #0d47a1; }
+
+  .contact-btn {
+    background: #1a73e8;
+    color: white;
+  }
+  .contact-btn:hover { background: #0d47a1; }
+
+  /* ✅ 탭 (개인석 번호들) */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+    gap: 14px;
+  }
+
+  .tabs a {
+    padding: 6px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    transition: 0.2s;
+    color: #00205B;
+    background: transparent;
+    border: 2px solid transparent;
+  }
+
+  /* ✅ 현재 클릭된 좌석 강조 */
+  .tabs a.active {
+    background: #e8f0fe;
+    border-color: #1a73e8;
+    color: #1a73e8;
+    box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
+  }
+
+  h2 { color: #0d47a1; margin: 22px 0 10px; text-align: center; }
+
+  /* ✅ 배치도 */
+  .layout { display: flex; justify-content: center; margin: 8px 0; }
+
+  .building {
+    background: #fff;
+    border: 2px solid #1a73e8;
+    border-radius: 8px;
+    padding: 16px 12px 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    position: relative;
+    transform: scale(0.9);
+  }
+
+  .seat-grid {
+    display: grid;
+    grid-template-columns: 100px 100px;
+    grid-template-rows: repeat(3, 60px);
+    column-gap: var(--col-gap);
+    row-gap: var(--row-gap);
+    justify-items: center;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+
+  .seat {
+    width: var(--seat-w);
+    height: var(--seat-h);
+    border: 3px solid #1a73e8;
+    border-radius: 10px;
+    background: #f9fbff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #00205b;
+    position: relative;
+    transition: 0.2s;
+  }
+
+  /* ✅ 현재 좌석 강조 */
+  .seat.current {
+    background: #1976d2;
+    color: #fff;
+    border-color: #1976d2;
+    box-shadow: 0 6px 14px rgba(25, 118, 210, 0.3);
+  }
+
+  /* ✅ 벽 */
+  .left-col::before, .right-col::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    width: var(--wall-thick);
+    background: #1a73e8;
+    border-radius: 3px;
+  }
+  .left-col::before { left: calc(var(--wall-gap) * -1); }
+  .right-col::after { right: calc(var(--wall-gap) * -1); }
+
+  /* ✅ 문 */
+  .door {
+    position: absolute;
+    right: calc(var(--wall-gap));
+    bottom: 48px;
+    border: 2px solid #1a73e8;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 1px 14px;
+    color: #00205b;
+    background: #fff;
+    font-weight: 700;
+    z-index: 2;
+  }
+
+  /* ✅ 복도 */
+  .hallway {
+    height: 32px;
+    background: #efefef;
+    border-top: 2px solid #1a73e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    border-radius: 0 0 6px 6px;
+  }
+
+  /* ✅ 예약표 */
+  table {
+    border-collapse: collapse;
+    width: 90%;
+    margin: 28px auto 60px;
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    table-layout: fixed;
+  }
+
+  th, td {
+    border: 1px solid #eee;
+    text-align: center;
+    font-size: 14px;
+    height: 40px;
+    padding: 4px;
+  }
+
+  th { background: #f1f6ff; color: #0d47a1; }
+
+  .reserved {
+    background: #ffe2e2;
+    color: #c62828;
+    font-weight: 600;
+  }
+
+  .free { background: #e8f5e9; }
+
+  a.btn {
+    background: #1976d2;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  a.btn:hover { background: #0d47a1; }
+</style>
+</head>
+
+<body>
+<header>
+  <a href="/" class="home-btn">← 메인으로</a>
+
+  <div class="tabs">
+    {% for i in range(1,8) %}
+      <a href="/personal_detail?seat={{ i }}" class="{{ 'active' if seat|int == i else '' }}">개인석 {{ i }}</a>
+    {% endfor %}
+  </div>
+
+  <a href="/contact" class="contact-btn">문의사항</a>
+</header>
+
+<main>
+  <h2>개인석 {{ seat }} 예약 현황</h2>
+
+  <div class="layout">
+    <div class="building">
+      <div class="seat-grid">
+        <div class="seat left-col  {% if seat|int == 7 %}current{% endif %}">7</div>
+        <div class="seat right-col {% if seat|int == 3 %}current{% endif %}">3</div>
+        <div class="seat left-col  {% if seat|int == 6 %}current{% endif %}">6</div>
+        <div class="seat right-col {% if seat|int == 2 %}current{% endif %}">2</div>
+        <div class="seat left-col  {% if seat|int == 5 %}current{% endif %}">5</div>
+        <div class="seat right-col {% if seat|int == 1 %}current{% endif %}">1</div>
+        <div class="seat left-col  {% if seat|int == 4 %}current{% endif %}">4</div>
+      </div>
+      <div class="door">문</div>
+      <div class="hallway">복도</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>시간</th>
+        {% for d in days[:3] %}
+          <th>{{ d }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in hours %}
+      <tr>
+        <td>{{ "%02d:00 ~ %02d:00" % (h, (h+1)%24) }}</td>
+        {% for d in days[:3] %}
+          {% set is_reserved = (h in reserved[d]) %}
+          <td class="{{ 'reserved' if is_reserved else 'free' }}">
+            {% if is_reserved %}
+              {{ owners.get((d, h), "예약됨") }}
+            {% else %}
+            <a class="btn" href="/personal_reserve_form?seat={{ seat }}&date={{ d }}&hour={{ h }}">예약 가능</a>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

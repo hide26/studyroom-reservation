@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>프로젝트실 {{ room }} 예약 현황</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      background: #f7f9fc;
+    }
+
+    /* ✅ 헤더 */
+    header {
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* ✅ “메인으로 / 문의사항” 버튼 */
+    .home-btn, .contact-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+    .home-btn {
+      background: #1565c0;
+      color: white;
+    }
+    .home-btn:hover { background: #0d47a1; }
+
+    .contact-btn {
+      background: #1a73e8;
+      color: white;
+    }
+    .contact-btn:hover { background: #0d47a1; }
+
+    /* ✅ 탭 */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      flex-grow: 1;
+      gap: 40px;
+    }
+
+    .tabs a {
+      padding: 8px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 18px;
+      transition: 0.2s;
+      color: #00205B;
+      background: transparent;
+      border: 2px solid transparent;
+    }
+
+    /* ✅ 현재 클릭된 탭 강조 */
+    .tabs a.active {
+      background: #e8f0fe;
+      border-color: #1a73e8;
+      color: #1a73e8;
+      box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
+    }
+
+    h2 { color: #0d47a1; margin: 24px 0 10px; text-align: center; }
+
+    /* ✅ 단체석 배치도 */
+    .layout {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
+    }
+
+    .building {
+      background: white;
+      border: 2px solid #1a73e8;
+      border-radius: 6px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .rooms {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .room {
+      width: 120px;
+      height: 160px;
+      border: 2px solid #1a73e8;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      transition: 0.25s;
+    }
+
+    /* ✅ 선택된 방 강조 */
+    .room.active {
+      background: #e8f0fe;
+      border: 3px solid #1a73e8;
+      box-shadow: 0 0 12px rgba(26, 115, 232, 0.4);
+      transform: scale(1.02);
+    }
+
+    .room h3 {
+      position: absolute;
+      top: 4px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #00205b;
+    }
+
+    .table {
+      width: 50px;
+      height: 70px;
+      border: 2px solid #1a73e8;
+      background: #f9fbff;
+    }
+
+    .door {
+      position: absolute;
+      bottom: 1px;
+      left: 1px;
+      border: 2px solid #1a73e8;
+      border-radius: 2px;
+      font-size: 10px;
+      padding: 0.01px 10px;
+      color: #00205b;
+    }
+
+    .door-mini {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      border: 2px solid #1a73e8;
+      border-radius: 2px;
+      font-size: 12px;
+      padding: 8px 0.01px;
+      color: #00205b;
+    }
+
+    .hallway {
+      height: 35px;
+      margin-top: 6px;
+      background: #efefef;
+      border-top: 2px solid #1a73e8;
+      text-align: center;
+      color: #555;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 35px;
+      letter-spacing: 1px;
+    }
+
+    /* ✅ 예약 테이블 */
+    table {
+      border-collapse: collapse;
+      width: 90%;
+      margin: 30px auto 60px;
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid #eee;
+      text-align: center;
+      font-size: 14px;
+      height: 40px;
+      padding: 4px;
+    }
+
+    th { background: #f1f6ff; color: #0d47a1; }
+
+    .reserved {
+      background: #ffe2e2;
+      color: #c62828;
+      font-weight: 600;
+    }
+
+    .free { background: #e8f5e9; }
+
+    a.btn {
+      background: #1976d2;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    a.btn:hover { background: #0d47a1; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <!-- ✅ 색깔 있는 버튼 형태로 -->
+    <a href="/" class="home-btn">← 메인으로</a>
+
+    <div class="tabs">
+      <a href="/room_detail?room=1" class="{{ 'active' if room == '1' else '' }}">프로젝트실 1</a>
+      <a href="/room_detail?room=2" class="{{ 'active' if room == '2' else '' }}">프로젝트실 2</a>
+    </div>
+
+    <a href="/contact" class="contact-btn">문의사항</a>
+  </header>
+
+  <main>
+    <h2>프로젝트실 {{ room }} 예약 현황</h2>
+
+    <!-- ✅ 배치도 -->
+    <div class="layout">
+      <div class="building">
+        <div class="rooms">
+          <div class="room left {% if room == '1' %}active{% endif %}">
+            <h3>프로젝트실 1</h3>
+            <div class="table"></div>
+            <div class="door">문</div>
+          </div>
+
+          <div class="room right {% if room == '2' %}active{% endif %}">
+            <h3>프로젝트실 2</h3>
+            <div class="table"></div>
+            <div class="door-mini">문</div>
+          </div>
+        </div>
+        <div class="hallway">복도</div>
+      </div>
+    </div>
+
+    <!-- ✅ 예약표 -->
+    <table>
+      <thead>
+        <tr>
+          <th>시간</th>
+          {% for d in days[:3] %}
+            <th>{{ d }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in hours %}
+        <tr>
+          <td>{{ "%02d:00 ~ %02d:00" % (h, (h+1)%24) }}</td>
+          {% for d in days[:3] %}
+            {% set is_reserved = (h in reserved[d]) %}
+            <td class="{{ 'reserved' if is_reserved else 'free' }}">
+              {% if is_reserved %}
+                {{ owners.get((d, h), "예약됨") }}
+              {% else %}
+                <a class="btn" href="/reserve_form?room={{ room }}&date={{ d }}&hour={{ h }}">예약 가능</a>
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
