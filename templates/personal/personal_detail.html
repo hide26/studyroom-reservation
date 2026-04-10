@@ -84,8 +84,12 @@
 
   h2 { color: #0d47a1; margin: 22px 0 10px; text-align: center; }
 
-  /* ✅ 배치도 */
-  .layout { display: flex; justify-content: center; margin: 8px 0; }
+  /* ✅ 배치도 - 원래 모양 유지 */
+  .layout {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+  }
 
   .building {
     background: #fff;
@@ -100,7 +104,7 @@
   .seat-grid {
     display: grid;
     grid-template-columns: 100px 100px;
-    grid-template-rows: repeat(3, 60px);
+    grid-template-rows: repeat(4, 60px);
     column-gap: var(--col-gap);
     row-gap: var(--row-gap);
     justify-items: center;
@@ -108,33 +112,32 @@
     margin-bottom: 40px;
   }
 
-  /* 개인석 */
-.seat-link {
-  text-decoration: none;
-  color: inherit;
-}
+  .seat-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
 
-.seat-box {
-  width: 50px;
-  height: 60px;
-  border: 3px solid #1a73e8;
-  border-radius: 10px;
-  background: #f9fbff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  transition: 0.2s;
-}
+  .seat {
+    width: var(--seat-w);
+    height: var(--seat-h);
+    border: 3px solid #1a73e8;
+    border-radius: 10px;
+    background: #f9fbff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    color: #00205b;
+    position: relative;
+    transition: 0.2s;
+    cursor: pointer;
+  }
 
-.seat-box:hover {
-  transform: scale(1.05);
-}
-
-.seat-box.active {
-  background: #1976d2;
-  color: white;
-}
+  .seat-link:hover .seat {
+    transform: scale(1.05);
+  }
 
   /* ✅ 현재 좌석 강조 */
   .seat.current {
@@ -246,39 +249,43 @@
 <main>
   <h2>개인석 {{ seat }} 예약 현황</h2>
 
-  <div class="seat-layout-wrapper">
-    <div class="seat-layout">
-        <div class="seat-column left">
-            <a href="{{ url_for('personal_detail', seat=7) }}" class="seat-link">
-                <div class="seat-box {% if seat == 7 %}active{% endif %}">7</div>
-            </a>
-            <a href="{{ url_for('personal_detail', seat=6) }}" class="seat-link">
-                <div class="seat-box {% if seat == 6 %}active{% endif %}">6</div>
-            </a>
-            <a href="{{ url_for('personal_detail', seat=5) }}" class="seat-link">
-                <div class="seat-box {% if seat == 5 %}active{% endif %}">5</div>
-            </a>
-            <a href="{{ url_for('personal_detail', seat=4) }}" class="seat-link">
-                <div class="seat-box {% if seat == 4 %}active{% endif %}">4</div>
-            </a>
-        </div>
+  <!-- ✅ 배치도: 원래 그림 유지 + 클릭 추가 -->
+  <div class="layout">
+    <div class="building">
+      <div class="seat-grid">
+        <a href="{{ url_for('personal_detail', seat=7) }}" class="seat-link" style="grid-column:1; grid-row:1;">
+          <div class="seat left-col {% if seat|int == 7 %}current{% endif %}">7</div>
+        </a>
 
-        <div class="seat-column right">
-            <a href="{{ url_for('personal_detail', seat=3) }}" class="seat-link">
-                <div class="seat-box {% if seat == 3 %}active{% endif %}">3</div>
-            </a>
-            <a href="{{ url_for('personal_detail', seat=2) }}" class="seat-link">
-                <div class="seat-box {% if seat == 2 %}active{% endif %}">2</div>
-            </a>
-            <a href="{{ url_for('personal_detail', seat=1) }}" class="seat-link">
-                <div class="seat-box {% if seat == 1 %}active{% endif %}">1</div>
-            </a>
-        </div>
+        <a href="{{ url_for('personal_detail', seat=3) }}" class="seat-link" style="grid-column:2; grid-row:1;">
+          <div class="seat right-col {% if seat|int == 3 %}current{% endif %}">3</div>
+        </a>
+
+        <a href="{{ url_for('personal_detail', seat=6) }}" class="seat-link" style="grid-column:1; grid-row:2;">
+          <div class="seat left-col {% if seat|int == 6 %}current{% endif %}">6</div>
+        </a>
+
+        <a href="{{ url_for('personal_detail', seat=2) }}" class="seat-link" style="grid-column:2; grid-row:2;">
+          <div class="seat right-col {% if seat|int == 2 %}current{% endif %}">2</div>
+        </a>
+
+        <a href="{{ url_for('personal_detail', seat=5) }}" class="seat-link" style="grid-column:1; grid-row:3;">
+          <div class="seat left-col {% if seat|int == 5 %}current{% endif %}">5</div>
+        </a>
+
+        <a href="{{ url_for('personal_detail', seat=1) }}" class="seat-link" style="grid-column:2; grid-row:3;">
+          <div class="seat right-col {% if seat|int == 1 %}current{% endif %}">1</div>
+        </a>
+
+        <a href="{{ url_for('personal_detail', seat=4) }}" class="seat-link" style="grid-column:1; grid-row:4;">
+          <div class="seat left-col {% if seat|int == 4 %}current{% endif %}">4</div>
+        </a>
+      </div>
+
+      <div class="door">문</div>
+      <div class="hallway">복도</div>
     </div>
-
-    <div class="seat-door">문</div>
-    <div class="hallway">복도</div>
-</div>
+  </div>
 
   <table>
     <thead>
@@ -299,7 +306,7 @@
             {% if is_reserved %}
               {{ owners.get((d, h), "예약됨") }}
             {% else %}
-            <a class="btn" href="/personal_reserve_form?seat={{ seat }}&date={{ d }}&hour={{ h }}">예약 가능</a>
+              <a class="btn" href="/personal_reserve_form?seat={{ seat }}&date={{ d }}&hour={{ h }}">예약 가능</a>
             {% endif %}
           </td>
         {% endfor %}
