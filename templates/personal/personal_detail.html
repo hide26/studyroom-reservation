@@ -19,7 +19,6 @@
     background: #f7f9fc;
   }
 
-  /* ✅ 헤더 */
   header {
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -32,7 +31,6 @@
     z-index: 100;
   }
 
-  /* ✅ 메인/문의사항 버튼 */
   .home-btn, .contact-btn {
     display: inline-block;
     padding: 8px 16px;
@@ -42,6 +40,7 @@
     font-size: 15px;
     transition: 0.2s;
   }
+
   .home-btn {
     background: #1565c0;
     color: white;
@@ -54,7 +53,6 @@
   }
   .contact-btn:hover { background: #0d47a1; }
 
-  /* ✅ 탭 (개인석 번호들) */
   .tabs {
     display: flex;
     justify-content: center;
@@ -74,7 +72,6 @@
     border: 2px solid transparent;
   }
 
-  /* ✅ 현재 클릭된 좌석 강조 */
   .tabs a.active {
     background: #e8f0fe;
     border-color: #1a73e8;
@@ -82,9 +79,13 @@
     box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
   }
 
-  h2 { color: #0d47a1; margin: 22px 0 10px; text-align: center; }
+  h2 {
+    color: #0d47a1;
+    margin: 22px 0 10px;
+    text-align: center;
+  }
 
-  /* ✅ 배치도 - 원래 모양 유지 */
+  /* 원래 배치도 유지 */
   .layout {
     display: flex;
     justify-content: center;
@@ -139,7 +140,6 @@
     transform: scale(1.05);
   }
 
-  /* ✅ 현재 좌석 강조 */
   .seat.current {
     background: #1976d2;
     color: #fff;
@@ -147,7 +147,6 @@
     box-shadow: 0 6px 14px rgba(25, 118, 210, 0.3);
   }
 
-  /* ✅ 벽 */
   .left-col::before, .right-col::after {
     content: "";
     position: absolute;
@@ -157,10 +156,10 @@
     background: #1a73e8;
     border-radius: 3px;
   }
+
   .left-col::before { left: calc(var(--wall-gap) * -1); }
   .right-col::after { right: calc(var(--wall-gap) * -1); }
 
-  /* ✅ 문 */
   .door {
     position: absolute;
     right: calc(var(--wall-gap));
@@ -175,7 +174,6 @@
     z-index: 2;
   }
 
-  /* ✅ 복도 */
   .hallway {
     height: 32px;
     background: #efefef;
@@ -190,7 +188,6 @@
     border-radius: 0 0 6px 6px;
   }
 
-  /* ✅ 예약표 */
   table {
     border-collapse: collapse;
     width: 90%;
@@ -210,7 +207,10 @@
     padding: 4px;
   }
 
-  th { background: #f1f6ff; color: #0d47a1; }
+  th {
+    background: #f1f6ff;
+    color: #0d47a1;
+  }
 
   .reserved {
     background: #ffe2e2;
@@ -218,7 +218,9 @@
     font-weight: 600;
   }
 
-  .free { background: #e8f5e9; }
+  .free {
+    background: #e8f5e9;
+  }
 
   a.btn {
     background: #1976d2;
@@ -249,7 +251,6 @@
 <main>
   <h2>개인석 {{ seat }} 예약 현황</h2>
 
-  <!-- ✅ 배치도: 원래 그림 유지 + 클릭 추가 -->
   <div class="layout">
     <div class="building">
       <div class="seat-grid">
