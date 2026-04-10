@@ -229,25 +229,27 @@
     <h2>프로젝트실 {{ room }} 예약 현황</h2>
 
     <!-- ✅ 배치도 -->
-    <div class="layout">
-      <div class="building">
-        <div class="rooms">
-          <div class="room left {% if room == '1' %}active{% endif %}">
-            <h3>프로젝트실 1</h3>
-            <div class="table"></div>
-            <div class="door">문</div>
-          </div>
+    <div class="room-layout-wrapper">
+    <div class="room-layout">
+        <a href="{{ url_for('room_detail', room=1) }}" class="room-link">
+            <div class="project-room {% if room == 1 %}active{% endif %}">
+                <div class="room-title">프로젝트실 1</div>
+                <div class="table-box"></div>
+                <div class="door left">문</div>
+            </div>
+        </a>
 
-          <div class="room right {% if room == '2' %}active{% endif %}">
-            <h3>프로젝트실 2</h3>
-            <div class="table"></div>
-            <div class="door-mini">문</div>
-          </div>
-        </div>
-        <div class="hallway">복도</div>
-      </div>
+        <a href="{{ url_for('room_detail', room=2) }}" class="room-link">
+            <div class="project-room {% if room == 2 %}active{% endif %}">
+                <div class="room-title">프로젝트실 2</div>
+                <div class="table-box"></div>
+                <div class="door right">문</div>
+            </div>
+        </a>
     </div>
 
+    <div class="hallway">복도</div>
+</div>
     <!-- ✅ 예약표 -->
     <table>
       <thead>
