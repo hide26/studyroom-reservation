@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>산업·데이터공학과 스터디룸 예약</title>
     <style>
-      /* 기본 리셋 */
       * {
         box-sizing: border-box;
       }
+
       html,
       body {
         height: 100%;
@@ -18,7 +18,7 @@
         color: #001b4e;
       }
 
-      /* 상하 남색 라인 (고정) */
+      /* 상하 남색 라인 */
       body::before,
       body::after {
         content: "";
@@ -29,9 +29,11 @@
         left: 0;
         z-index: 9999;
       }
+
       body::before {
         top: 0;
       }
+
       body::after {
         bottom: 0;
       }
@@ -49,17 +51,20 @@
       header {
         text-align: center;
       }
+
       header img.logo {
         width: 320px;
         max-width: 40vw;
         margin-bottom: 8px;
       }
+
       h3.kor-title {
         font-size: 40px;
         margin: 6px 0 0;
         font-weight: 700;
         color: #001b4e;
       }
+
       h1 {
         font-size: 50px;
         margin: 20px 0 24px;
@@ -94,7 +99,7 @@
         margin-top: 0px;
       }
 
-      /* 상단 큰 버튼 (단체석 / 개인석) */
+      /* 상단 큰 버튼 */
       .big-buttons {
         display: flex;
         justify-content: center;
@@ -145,7 +150,7 @@
         transform: scale(1);
       }
 
-      /* 하단 버튼 (작은 네모 버튼들) */
+      /* 하단 작은 버튼 */
       .small-buttons {
         display: flex;
         flex-wrap: wrap;
@@ -170,12 +175,15 @@
       .small-buttons a.green {
         background-color: #27ae60;
       }
+
       .small-buttons a.blue {
         background-color: #1565c0;
       }
+
       .small-buttons a.red {
         background-color: #c62828;
       }
+
       .small-buttons a.yellow {
         background-color: #ffd700;
         color: #00205b;
@@ -186,30 +194,38 @@
         filter: brightness(1.1);
       }
 
-      /* 영어 푸터 */
+      /* 맨 아래 흰 글씨 */
       .eng-footer {
         position: fixed;
         bottom: 2px;
         left: 0;
         width: 100%;
         text-align: center;
-        font-size: 20px;
+        font-size: 18px;
+        line-height: 1.25;
         color: white;
         z-index: 10000;
         pointer-events: none;
       }
 
-      /* ✅ 반응형 (모바일만 변경, 웹은 그대로 유지) */
+      .eng-footer .admin-line {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+
       @media (max-width: 768px) {
         header img.logo {
           width: 240px;
         }
+
         h3.kor-title {
           font-size: 30px;
-        } /* 글씨 살짝 키움 */
+        }
+
         h1 {
           font-size: 38px;
-        } /* 글씨 살짝 키움 */
+        }
+
         img.mascot {
           width: 140px;
         }
@@ -218,7 +234,6 @@
           gap: 24px;
         }
 
-        /* ✅ 단체석/개인석 가로 정렬 */
         .big-buttons {
           flex-direction: row;
           justify-content: center;
@@ -237,11 +252,15 @@
           font-size: 14px;
         }
 
-        /* ✅ 영어 푸터 */
         .eng-footer {
           font-size: 12px;
-          bottom: 6px;
-          white-space: nowrap;
+          bottom: 4px;
+          white-space: normal;
+          line-height: 1.2;
+        }
+
+        .eng-footer .admin-line {
+          font-size: 10px;
         }
       }
     </style>
@@ -267,15 +286,12 @@
         />
       </div>
 
-      <!-- 버튼 전체 -->
       <div class="button-section">
-        <!-- 큰 버튼 -->
         <div class="big-buttons">
           <a href="{{ url_for('room_detail') }}?room=1">단체</a>
           <a href="{{ url_for('personal_detail') }}?seat=1">개인</a>
         </div>
 
-        <!-- 작은 버튼 -->
         <div class="small-buttons">
           <a href="{{ url_for('contact') }}" class="green">문의사항</a>
           <a href="{{ url_for('hvac') }}" class="blue">냉/난방</a>
@@ -285,9 +301,9 @@
       </div>
     </div>
 
-    <div class="footer">
-  Industrial & Data Engineering, Hongik University<br>
-  홍익대학교 산업·데이터공학과 학생회 운영
+    <div class="eng-footer">
+      Industrial & Data Engineering, Hongik University<br />
+      <span class="admin-line">홍익대학교 산업·데이터공학과 학생회 운영</span>
     </div>
   </body>
 </html>
