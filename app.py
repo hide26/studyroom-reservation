@@ -482,6 +482,10 @@ def extend_confirm():
 # -------------------------------
 @app.route("/cancel_all", methods=["GET", "POST"])
 def cancel_all():
+    now = datetime.now(KST)
+    today = now.strftime("%Y-%m-%d")
+    current_hour = now.hour
+
     if request.method == "GET":
         return render_template("cancel_all.html")
 
@@ -493,17 +497,29 @@ def cancel_all():
         safe_flash("⚠️ 이름, 학번, 전화번호를 모두 입력해주세요.")
         return redirect(url_for("cancel_all"))
 
-    group_reservations = Reservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+    # ✅ 오늘 이후 예약 + 오늘 남은 시간 예약만 조회
+    group_reservations = Reservation.query.filter(
+        Reservation.leader_name == leader_name,
+        Reservation.leader_id == leader_id,
+        Reservation.leader_phone == leader_phone,
+        (
+            (Reservation.date > today) |
+            ((Reservation.date == today) & (cast(Reservation.hour, Integer) >= current_hour))
+        )
     ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
 
-    personal_reservations = PersonalReservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+    personal_reservations = PersonalReservation.query.filter(
+        PersonalReservation.leader_name == leader_name,
+        PersonalReservation.leader_id == leader_id,
+        PersonalReservation.leader_phone == leader_phone,
+        (
+            (PersonalReservation.date > today) |
+            ((PersonalReservation.date == today) & (cast(PersonalReservation.hour, Integer) >= current_hour))
+        )
     ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
 
-    # ✅ 결과가 없더라도 결과 페이지에서 경고를 보여주도록 렌더링
     if not group_reservations and not personal_reservations:
-        safe_flash("❌ 해당 정보로 예약된 내역이 없습니다.")
+        safe_flash("❌ 취소 가능한 예약 내역이 없습니다.")
         return render_template(
             "cancel_all_result.html",
             group_reservations=[],
@@ -524,6 +540,10 @@ def cancel_all():
 
 @app.route("/cancel_all_confirm", methods=["POST"])
 def cancel_all_confirm():
+    now = datetime.now(KST)
+    today = now.strftime("%Y-%m-%d")
+    current_hour = now.hour
+
     selected_items = request.form.getlist("selected")
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
@@ -531,12 +551,27 @@ def cancel_all_confirm():
 
     if not selected_items:
         safe_flash("⚠️ 선택된 예약이 없습니다.")
-        group_reservations = Reservation.query.filter_by(
-            leader_name=leader_name, leader_id=leader_id
+
+        group_reservations = Reservation.query.filter(
+            Reservation.leader_name == leader_name,
+            Reservation.leader_id == leader_id,
+            Reservation.leader_phone == leader_phone,
+            (
+                (Reservation.date > today) |
+                ((Reservation.date == today) & (cast(Reservation.hour, Integer) >= current_hour))
+            )
         ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
-        personal_reservations = PersonalReservation.query.filter_by(
-            leader_name=leader_name, leader_id=leader_id
+
+        personal_reservations = PersonalReservation.query.filter(
+            PersonalReservation.leader_name == leader_name,
+            PersonalReservation.leader_id == leader_id,
+            PersonalReservation.leader_phone == leader_phone,
+            (
+                (PersonalReservation.date > today) |
+                ((PersonalReservation.date == today) & (cast(PersonalReservation.hour, Integer) >= current_hour))
+            )
         ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
+
         return render_template(
             "cancel_all_result.html",
             group_reservations=group_reservations,
@@ -550,7 +585,7 @@ def cancel_all_confirm():
 
     for item in selected_items:
         try:
-            # ✅ value 형식: "group:3" 또는 "personal:7"
+            # value 형식: "group:3" 또는 "personal:7"
             type_, id_str = item.split(":", 1)
             target_id = int(id_str)
 
@@ -558,7 +593,8 @@ def cancel_all_confirm():
                 deleted = Reservation.query.filter_by(
                     id=target_id,
                     leader_name=leader_name,
-                    leader_id=leader_id
+                    leader_id=leader_id,
+                    leader_phone=leader_phone
                 ).delete(synchronize_session=False) or 0
                 group_deleted += deleted
 
@@ -566,7 +602,8 @@ def cancel_all_confirm():
                 deleted = PersonalReservation.query.filter_by(
                     id=target_id,
                     leader_name=leader_name,
-                    leader_id=leader_id
+                    leader_id=leader_id,
+                    leader_phone=leader_phone
                 ).delete(synchronize_session=False) or 0
                 personal_deleted += deleted
 
@@ -581,13 +618,25 @@ def cancel_all_confirm():
     else:
         safe_flash("⚠️ 선택된 예약을 찾을 수 없거나 이미 삭제되었습니다.")
 
-    # ✅ 삭제 후 남은 예약 다시 불러오기
-    group_reservations = Reservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id
+    # ✅ 삭제 후에도 앞으로 남은 예약만 다시 조회
+    group_reservations = Reservation.query.filter(
+        Reservation.leader_name == leader_name,
+        Reservation.leader_id == leader_id,
+        Reservation.leader_phone == leader_phone,
+        (
+            (Reservation.date > today) |
+            ((Reservation.date == today) & (cast(Reservation.hour, Integer) >= current_hour))
+        )
     ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
 
-    personal_reservations = PersonalReservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id
+    personal_reservations = PersonalReservation.query.filter(
+        PersonalReservation.leader_name == leader_name,
+        PersonalReservation.leader_id == leader_id,
+        PersonalReservation.leader_phone == leader_phone,
+        (
+            (PersonalReservation.date > today) |
+            ((PersonalReservation.date == today) & (cast(PersonalReservation.hour, Integer) >= current_hour))
+        )
     ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
 
     return render_template(
