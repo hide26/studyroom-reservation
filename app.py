@@ -46,30 +46,31 @@ def hvac():
 # -------------------------------
 @app.route('/room_detail')
 def room_detail():
-    room = request.args.get('room', default=1, type=int)
+    room = request.args.get('room', default='1')
 
     days = make_days(7)
     hours = hours_24()
 
-    reservations = (
-        Reservation.query
-        .filter_by(room=room)
-        .all()
-    )
+    reservations = Reservation.query.filter_by(room=room).all()
 
     reserved = {d: [] for d in days}
     owners = {}
 
     for r in reservations:
-        d = r.date.strftime("%Y-%m-%d") if hasattr(r.date, "strftime") else str(r.date)
+        d = str(r.date)
+        try:
+            h = int(r.hour)
+        except:
+            continue
+
         if d in reserved:
-            reserved[d].append(r.hour)
-            owner_name = getattr(r, "name", None) or getattr(r, "student_id", None) or "예약됨"
-            owners[(d, r.hour)] = owner_name
+            reserved[d].append(h)
+            owner_label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
+            owners[(d, h)] = owner_label if owner_label else "예약됨"
 
     return render_template(
         'group/room_detail.html',
-        room=room,
+        room=int(room),
         days=days,
         hours=hours,
         reserved=reserved,
@@ -169,30 +170,31 @@ def reserve_group():
 # -------------------------------
 @app.route('/personal_detail')
 def personal_detail():
-    seat = request.args.get('seat', default=1, type=int)
+    seat = request.args.get('seat', default='1')
 
     days = make_days(7)
     hours = hours_24()
 
-    reservations = (
-        PersonalReservation.query
-        .filter_by(seat=seat)
-        .all()
-    )
+    reservations = PersonalReservation.query.filter_by(seat=seat).all()
 
     reserved = {d: [] for d in days}
     owners = {}
 
     for r in reservations:
-        d = r.date.strftime("%Y-%m-%d") if hasattr(r.date, "strftime") else str(r.date)
+        d = str(r.date)
+        try:
+            h = int(r.hour)
+        except:
+            continue
+
         if d in reserved:
-            reserved[d].append(r.hour)
-            owner_name = getattr(r, "name", None) or getattr(r, "student_id", None) or "예약됨"
-            owners[(d, r.hour)] = owner_name
+            reserved[d].append(h)
+            owner_label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
+            owners[(d, h)] = owner_label if owner_label else "예약됨"
 
     return render_template(
         'personal/personal_detail.html',
-        seat=seat,
+        seat=int(seat),
         days=days,
         hours=hours,
         reserved=reserved,
