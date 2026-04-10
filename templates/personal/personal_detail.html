@@ -234,21 +234,39 @@
 <main>
   <h2>개인석 {{ seat }} 예약 현황</h2>
 
-  <div class="layout">
-    <div class="building">
-      <div class="seat-grid">
-        <div class="seat left-col  {% if seat|int == 7 %}current{% endif %}">7</div>
-        <div class="seat right-col {% if seat|int == 3 %}current{% endif %}">3</div>
-        <div class="seat left-col  {% if seat|int == 6 %}current{% endif %}">6</div>
-        <div class="seat right-col {% if seat|int == 2 %}current{% endif %}">2</div>
-        <div class="seat left-col  {% if seat|int == 5 %}current{% endif %}">5</div>
-        <div class="seat right-col {% if seat|int == 1 %}current{% endif %}">1</div>
-        <div class="seat left-col  {% if seat|int == 4 %}current{% endif %}">4</div>
-      </div>
-      <div class="door">문</div>
-      <div class="hallway">복도</div>
+  <div class="seat-layout-wrapper">
+    <div class="seat-layout">
+        <div class="seat-column left">
+            <a href="{{ url_for('personal_detail', seat=7) }}" class="seat-link">
+                <div class="seat-box {% if seat == 7 %}active{% endif %}">7</div>
+            </a>
+            <a href="{{ url_for('personal_detail', seat=6) }}" class="seat-link">
+                <div class="seat-box {% if seat == 6 %}active{% endif %}">6</div>
+            </a>
+            <a href="{{ url_for('personal_detail', seat=5) }}" class="seat-link">
+                <div class="seat-box {% if seat == 5 %}active{% endif %}">5</div>
+            </a>
+            <a href="{{ url_for('personal_detail', seat=4) }}" class="seat-link">
+                <div class="seat-box {% if seat == 4 %}active{% endif %}">4</div>
+            </a>
+        </div>
+
+        <div class="seat-column right">
+            <a href="{{ url_for('personal_detail', seat=3) }}" class="seat-link">
+                <div class="seat-box {% if seat == 3 %}active{% endif %}">3</div>
+            </a>
+            <a href="{{ url_for('personal_detail', seat=2) }}" class="seat-link">
+                <div class="seat-box {% if seat == 2 %}active{% endif %}">2</div>
+            </a>
+            <a href="{{ url_for('personal_detail', seat=1) }}" class="seat-link">
+                <div class="seat-box {% if seat == 1 %}active{% endif %}">1</div>
+            </a>
+        </div>
     </div>
-  </div>
+
+    <div class="seat-door">문</div>
+    <div class="hallway">복도</div>
+</div>
 
   <table>
     <thead>
