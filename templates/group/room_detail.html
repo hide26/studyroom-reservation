@@ -10,7 +10,6 @@
       background: #f7f9fc;
     }
 
-    /* ✅ 헤더 */
     header {
       background: #fff;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -23,7 +22,6 @@
       z-index: 100;
     }
 
-    /* ✅ “메인으로 / 문의사항” 버튼 */
     .home-btn, .contact-btn {
       display: inline-block;
       padding: 8px 16px;
@@ -33,6 +31,7 @@
       font-size: 15px;
       transition: 0.2s;
     }
+
     .home-btn {
       background: #1565c0;
       color: white;
@@ -45,7 +44,6 @@
     }
     .contact-btn:hover { background: #0d47a1; }
 
-    /* ✅ 탭 */
     .tabs {
       display: flex;
       justify-content: center;
@@ -65,7 +63,6 @@
       border: 2px solid transparent;
     }
 
-    /* ✅ 현재 클릭된 탭 강조 */
     .tabs a.active {
       background: #e8f0fe;
       border-color: #1a73e8;
@@ -73,9 +70,13 @@
       box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
     }
 
-    h2 { color: #0d47a1; margin: 24px 0 10px; text-align: center; }
+    h2 {
+      color: #0d47a1;
+      margin: 24px 0 10px;
+      text-align: center;
+    }
 
-    /* ✅ 단체석 배치도 - 원래 모양 유지 */
+    /* 원래 배치도 유지 */
     .layout {
       display: flex;
       justify-content: center;
@@ -122,7 +123,6 @@
       transform: scale(1.02);
     }
 
-    /* ✅ 선택된 방 강조 */
     .room.active {
       background: #e8f0fe;
       border: 3px solid #1a73e8;
@@ -155,7 +155,7 @@
       font-size: 10px;
       padding: 0.01px 10px;
       color: #00205b;
-      background: white;
+      background: #fff;
     }
 
     .door-mini {
@@ -167,7 +167,7 @@
       font-size: 12px;
       padding: 8px 0.01px;
       color: #00205b;
-      background: white;
+      background: #fff;
     }
 
     .hallway {
@@ -183,7 +183,6 @@
       letter-spacing: 1px;
     }
 
-    /* ✅ 예약 테이블 */
     table {
       border-collapse: collapse;
       width: 90%;
@@ -203,7 +202,10 @@
       padding: 4px;
     }
 
-    th { background: #f1f6ff; color: #0d47a1; }
+    th {
+      background: #f1f6ff;
+      color: #0d47a1;
+    }
 
     .reserved {
       background: #ffe2e2;
@@ -211,7 +213,9 @@
       font-weight: 600;
     }
 
-    .free { background: #e8f5e9; }
+    .free {
+      background: #e8f5e9;
+    }
 
     a.btn {
       background: #1976d2;
@@ -222,7 +226,9 @@
       font-size: 13px;
     }
 
-    a.btn:hover { background: #0d47a1; }
+    a.btn:hover {
+      background: #0d47a1;
+    }
   </style>
 </head>
 
@@ -241,12 +247,11 @@
   <main>
     <h2>프로젝트실 {{ room }} 예약 현황</h2>
 
-    <!-- ✅ 배치도: 원래 그림 유지 + 클릭 추가 -->
     <div class="layout">
       <div class="building">
         <div class="rooms">
           <a href="{{ url_for('room_detail', room=1) }}" class="room-link">
-            <div class="room left {% if room|int == 1 %}active{% endif %}">
+            <div class="room {% if room|int == 1 %}active{% endif %}">
               <h3>프로젝트실 1</h3>
               <div class="table"></div>
               <div class="door">문</div>
@@ -254,7 +259,7 @@
           </a>
 
           <a href="{{ url_for('room_detail', room=2) }}" class="room-link">
-            <div class="room right {% if room|int == 2 %}active{% endif %}">
+            <div class="room {% if room|int == 2 %}active{% endif %}">
               <h3>프로젝트실 2</h3>
               <div class="table"></div>
               <div class="door-mini">문</div>
@@ -265,7 +270,6 @@
       </div>
     </div>
 
-    <!-- ✅ 예약표 -->
     <table>
       <thead>
         <tr>
