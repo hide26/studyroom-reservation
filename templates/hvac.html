@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>냉/난방 사용 방법</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      background: linear-gradient(180deg, #f7f9fc 0%, #eef3ff 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: white;
+      padding: 50px 60px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      transition: 0.3s ease;
+      max-width: 760px;
+      width: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      color: #001B4E;
+      font-size: 28px;
+      margin-top: 0;
+      margin-bottom: 30px;
+      letter-spacing: -0.3px;
+      text-align: center;
+    }
+
+    ol {
+      margin: 0;
+      padding-left: 24px;
+      color: #333;
+      font-size: 17px;
+      line-height: 1.9;
+    }
+
+    li {
+      margin-bottom: 16px;
+    }
+
+    .account-box {
+      margin-top: 12px;
+      margin-bottom: 10px;
+      padding: 16px 20px;
+      background: #f5f8ff;
+      border-radius: 14px;
+      border-left: 5px solid #1557c0;
+      color: #222;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .account-box strong {
+      color: #001B4E;
+    }
+
+    .notice {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: #fff7e6;
+      border-radius: 14px;
+      border-left: 5px solid #ffb300;
+      color: #5f4300;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .link-wrap {
+      margin-top: 26px;
+      text-align: center;
+    }
+
+    .direct-link {
+      display: inline-block;
+      padding: 12px 22px;
+      border-radius: 10px;
+      background-color: #1565c0;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: 0.2s ease;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    }
+
+    .direct-link:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    a.home {
+      display: block;
+      margin-top: 24px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    a.home:hover {
+      text-decoration: underline;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 36px 24px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      ol {
+        font-size: 15px;
+      }
+
+      .account-box,
+      .notice {
+        font-size: 14px;
+      }
+
+      .eng-footer {
+        font-size: 12px;
+        bottom: 6px;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>냉/난방 사용 방법</h2>
+
+    <ol>
+      <li><strong>학교 와이파이(Hongik_wifi)에 접속합니다.</strong></li>
+
+      <li>
+        브라우저에서 <strong>http://203.249.68.52</strong> 에 접속합니다.
+      </li>
+
+      <li>
+        아래 아이디와 비밀번호를 입력합니다.
+        <div class="account-box">
+          <div><strong>개인실</strong>: t1009-1</div>
+          <div><strong>프로젝트실2</strong>: t1009-2</div>
+          <div><strong>프로젝트실1</strong>: t1009-3</div>
+          <div><strong>비밀번호</strong>: 1111</div>
+        </div>
+      </li>
+
+      <li>
+        원하는 온도로 설정한 뒤, <strong>운전/정지 옆 버튼을 눌러 빨간색 불이 들어오는지 확인</strong>합니다.
+      </li>
+
+      <li>
+        마지막으로 <strong>전송 버튼</strong>을 눌러 적용합니다.
+      </li>
+    </ol>
+
+    <div class="notice">
+      ※ 반드시 <strong>Hongik_wifi 접속 후</strong> 사용해야 정상적으로 접속됩니다.
+    </div>
+
+    <div class="link-wrap">
+      <a href="http://203.249.68.52" target="_blank" class="direct-link">바로 접속하기</a>
+    </div>
+
+    <a href="/" class="home">← 메인으로 돌아가기</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
+</body>
+</html>
