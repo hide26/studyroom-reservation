@@ -108,21 +108,33 @@
     margin-bottom: 40px;
   }
 
-  .seat {
-    width: var(--seat-w);
-    height: var(--seat-h);
-    border: 3px solid #1a73e8;
-    border-radius: 10px;
-    background: #f9fbff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
-    color: #00205b;
-    position: relative;
-    transition: 0.2s;
-  }
+  /* 개인석 */
+.seat-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.seat-box {
+  width: 50px;
+  height: 60px;
+  border: 3px solid #1a73e8;
+  border-radius: 10px;
+  background: #f9fbff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.seat-box:hover {
+  transform: scale(1.05);
+}
+
+.seat-box.active {
+  background: #1976d2;
+  color: white;
+}
 
   /* ✅ 현재 좌석 강조 */
   .seat.current {
