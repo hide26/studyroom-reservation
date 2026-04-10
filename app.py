@@ -44,50 +44,37 @@ def hvac():
 # -------------------------------
 # 🔹 단체석 예약 (Project Room)
 # -------------------------------
-@app.route("/room_detail")
+@app.route('/room_detail')
 def room_detail():
-    room = request.args.get("room", "1")
+    room = request.args.get('room', default=1, type=int)
+
     days = make_days(7)
     hours = hours_24()
 
-    # ✅ 이번 주(7일치) 데이터만 불러오기
-    reservations = Reservation.query.filter(
-        Reservation.room == room,
-        Reservation.date.in_(days)
-    ).all()
+    reservations = (
+        Reservation.query
+        .filter_by(room=room)
+        .all()
+    )
 
-    reserved = {d: set() for d in days}
+    reserved = {d: [] for d in days}
     owners = {}
 
     for r in reservations:
-        try:
-            start = int(r.hour)
-            dur = int(r.duration or 1)
-            rname = (r.leader_name or "").strip()
-            rid = (r.leader_id or "").strip().upper()
-            label = f"{rid} {rname}" if rname and rname != rid else rid
-
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                key = (r.date, h)
-                if key not in owners:
-                    owners[key] = label
-                elif label not in owners[key]:
-                    owners[key] += f", {label}"
-
-        except Exception as e:
-            print("⚠ hour/duration parse error:", e)
+        d = r.date.strftime("%Y-%m-%d") if hasattr(r.date, "strftime") else str(r.date)
+        if d in reserved:
+            reserved[d].append(r.hour)
+            owner_name = getattr(r, "name", None) or getattr(r, "student_id", None) or "예약됨"
+            owners[(d, r.hour)] = owner_name
 
     return render_template(
-        "group/room_detail.html",
+        'group/room_detail.html',
         room=room,
         days=days,
         hours=hours,
         reserved=reserved,
         owners=owners
     )
-
-
 @app.route("/reserve_form")
 def reserve_form():
     room = request.args.get("room")
@@ -180,37 +167,37 @@ def reserve_group():
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
-@app.route("/personal_detail")
+@app.route('/personal_detail')
 def personal_detail():
-    seat = request.args.get("seat", default=1, type=int)
-    days = make_days(3)
+    seat = request.args.get('seat', default=1, type=int)
+
+    days = make_days(7)
     hours = hours_24()
 
-    reservations = PersonalReservation.query.filter(
-        PersonalReservation.seat == str(seat),
-        PersonalReservation.date.in_(days)
-    ).all()
-
-    reserved = {d: set() for d in days}
-    owners = {}
-    for r in reservations:
-        try:
-            start = int(r.hour)
-            dur = int(r.duration or 1)
-            label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                owners[(r.date, h)] = label
-        except Exception as e:
-            print("⚠ personal_detail parse error:", e)
-
-    return render_template(
-        "personal/personal_detail.html",
-        seat=seat, days=days, hours=hours,
-        reserved=reserved, owners=owners
+    reservations = (
+        PersonalReservation.query
+        .filter_by(seat=seat)
+        .all()
     )
 
+    reserved = {d: [] for d in days}
+    owners = {}
 
+    for r in reservations:
+        d = r.date.strftime("%Y-%m-%d") if hasattr(r.date, "strftime") else str(r.date)
+        if d in reserved:
+            reserved[d].append(r.hour)
+            owner_name = getattr(r, "name", None) or getattr(r, "student_id", None) or "예약됨"
+            owners[(d, r.hour)] = owner_name
+
+    return render_template(
+        'personal/personal_detail.html',
+        seat=seat,
+        days=days,
+        hours=hours,
+        reserved=reserved,
+        owners=owners
+    )
 @app.route("/personal_all")
 def personal_all():
     days = make_days(3)
