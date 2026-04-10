@@ -207,6 +207,35 @@
       text-decoration: none;
       font-size: 13px;
     }
+       .seat-link {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .seat-box {
+    width: var(--seat-w);
+    height: var(--seat-h);
+    border: 3px solid #1a73e8;
+    border-radius: 10px;
+    background: #f9fbff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #00205b;
+    transition: 0.2s;
+  }
+
+  .seat-box:hover {
+    transform: scale(1.05);
+  }
+
+  .seat-box.active {
+    background: #1976d2;
+    color: white;
+    border-color: #1976d2;
+    box-shadow: 0 6px 14px rgba(25, 118, 210, 0.3);
+  }
 
     a.btn:hover { background: #0d47a1; }
   </style>
