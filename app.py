@@ -44,33 +44,43 @@ def hvac():
 # -------------------------------
 # 🔹 단체석 예약 (Project Room)
 # -------------------------------
-@app.route('/room_detail')
+@app.route("/room_detail")
 def room_detail():
-    room = request.args.get('room', default='1')
-
+    room = request.args.get("room", "1")
     days = make_days(7)
     hours = hours_24()
 
-    reservations = Reservation.query.filter_by(room=room).all()
+    # ✅ 이번 주(7일치) 데이터만 불러오기
+    reservations = Reservation.query.filter(
+        Reservation.room == room,
+        Reservation.date.in_(days)
+    ).all()
 
-    reserved = {d: [] for d in days}
+    reserved = {d: set() for d in days}
     owners = {}
 
     for r in reservations:
-        d = str(r.date)
         try:
-            h = int(r.hour)
-        except:
-            continue
+            start = int(r.hour)
+            dur = int(r.duration or 1)
+            rname = (r.leader_name or "").strip()
+            rid = (r.leader_id or "").strip().upper()
+            label = f"{rid} {rname}" if rname and rname != rid else rid
 
-        if d in reserved:
-            reserved[d].append(h)
-            owner_label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            owners[(d, h)] = owner_label if owner_label else "예약됨"
+            for h in expand_hours(start, dur):
+                reserved[r.date].add(h)
+                key = (r.date, h)
+                if key not in owners:
+                    owners[key] = label
+                elif label not in owners[key]:
+                    owners[key] += f", {label}"
+
+        except Exception as e:
+            print("⚠ hour/duration parse error:", e)
 
     return render_template(
-        'group/room_detail.html',
-        room=int(room),
+        "group/room_detail.html",
+        room=room,
         days=days,
         hours=hours,
         reserved=reserved,
