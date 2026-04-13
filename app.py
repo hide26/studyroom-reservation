@@ -178,33 +178,36 @@ def reserve_group():
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
-@app.route('/personal_detail')
+@app.route("/personal_detail")
 def personal_detail():
-    seat = request.args.get('seat', default='1')
-
-    days = make_days(7)
+    seat = request.args.get("seat", default=1, type=int)
+    days = make_days(3)
     hours = hours_24()
 
-    reservations = PersonalReservation.query.filter_by(seat=seat).all()
+    reservations = PersonalReservation.query.filter(
+        PersonalReservation.seat == str(seat),
+        PersonalReservation.date.in_(days)
+    ).all()
 
-    reserved = {d: [] for d in days}
+    reserved = {d: set() for d in days}
     owners = {}
 
     for r in reservations:
-        d = str(r.date)
         try:
-            h = int(r.hour)
-        except:
-            continue
+            start = int(r.hour)
+            dur = int(r.duration or 1)
+            label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
 
-        if d in reserved:
-            reserved[d].append(h)
-            owner_label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            owners[(d, h)] = owner_label if owner_label else "예약됨"
+            for h in expand_hours(start, dur):
+                reserved[r.date].add(h)
+                owners[(r.date, h)] = label if label else "예약됨"
+
+        except Exception as e:
+            print("⚠ personal_detail parse error:", e)
 
     return render_template(
-        'personal/personal_detail.html',
-        seat=int(seat),
+        "personal/personal_detail.html",
+        seat=seat,
         days=days,
         hours=hours,
         reserved=reserved,
