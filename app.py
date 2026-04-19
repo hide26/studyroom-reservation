@@ -11,7 +11,203 @@ def make_days(n=7):
     """✅ 오늘부터 n일치 날짜 리스트 생성 (한국 시간 기준)"""
     base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
     return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
+@app.route("/reserve", methods=["POST"])
+def reserve_group():
+    room = request.form.get("room")
+    date = request.form.get("date")
+    hour = int(request.form.get("hour"))
+    duration = int(request.form.get("duration", 1))
+    leader_name = request.form.get("leader_name", "").strip()
+    leader_id = request.form.get("leader_id", "").strip().upper()
+    leader_phone = request.form.get("leader_phone", "").strip()
 
+    # ✅ 입력 검증
+    if not leader_name or not leader_id or leader_name == leader_id:
+        return render_template(
+            "group/simple_msg.html",
+            title="❌ 예약 불가",
+            message="대표자 이름과 학번을 올바르게 입력해주세요.",
+            back_url=f"/room_detail?room={room}"
+        )
+
+    start_hour = hour
+    end_hour = hour + duration
+
+    # ✅ 같은 사용자 개인석 중복 검사
+    overlap_personal = PersonalReservation.query.filter(
+        PersonalReservation.leader_id == leader_id,
+        PersonalReservation.date == date
+    ).all()
+
+    for p in overlap_personal:
+        p_start = int(p.hour)
+        p_end = p_start + int(p.duration or 1)
+        if not (end_hour <= p_start or start_hour >= p_end):
+            return render_template(
+                "error.html",
+                title="예약 불가",
+                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                back_url=url_for('index')
+            )
+
+    # ✅ 프로젝트실 1, 2 한정: 하루 총 3시간 제한
+    if room in ("1", "2"):
+        existing_by_user = Reservation.query.filter(
+            Reservation.room == room,
+            Reservation.date == date,
+            Reservation.leader_id == leader_id
+        ).all()
+
+        already_used = sum(int(r.duration or 1) for r in existing_by_user)
+
+        if already_used + duration > 3:
+            remaining = 3 - already_used
+            return render_template(
+                "group/simple_msg.html",
+                title="❌ 예약 불가",
+                message=f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.<br>"
+                        f"({date} 기준 이미 {already_used}시간 사용 중"
+                        + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)"),
+                back_url=f"/room_detail?room={room}"
+            )
+
+    # ✅ 단체실 내 중복 예약 검사
+    existing = Reservation.query.filter(
+        Reservation.room == room,
+        Reservation.date == date
+    ).all()
+
+    target_hours = set(range(hour, hour + duration))
+    for r in existing:
+        s = int(r.hour)
+        d = int(r.duration or 1)
+        exists_hours = set(range(s, s + d))
+        if target_hours & exists_hours:
+            return render_template(
+                "group/simple_msg.html",
+                title="❌ 예약 불가",
+                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
+                back_url=f"/room_detail?room={room}"
+            )
+
+    # ✅ DB 저장
+    new_resv = Reservation(
+        room=room,
+        date=date,
+        hour=str(hour),
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone,
+        total_people=1,
+        duration=duration
+    )
+    db.session.add(new_resv)
+    db.session.commit()
+
+    return render_template(
+        "group/simple_msg.html",
+        title="✅ 예약 완료",
+        message="예약이 성공적으로 완료되었습니다!",
+        back_url=f"/room_detail?room={room}"
+    )@app.route("/reserve", methods=["POST"])
+def reserve_group():
+    room = request.form.get("room")
+    date = request.form.get("date")
+    hour = int(request.form.get("hour"))
+    duration = int(request.form.get("duration", 1))
+    leader_name = request.form.get("leader_name", "").strip()
+    leader_id = request.form.get("leader_id", "").strip().upper()
+    leader_phone = request.form.get("leader_phone", "").strip()
+
+    # ✅ 입력 검증
+    if not leader_name or not leader_id or leader_name == leader_id:
+        return render_template(
+            "group/simple_msg.html",
+            title="❌ 예약 불가",
+            message="대표자 이름과 학번을 올바르게 입력해주세요.",
+            back_url=f"/room_detail?room={room}"
+        )
+
+    start_hour = hour
+    end_hour = hour + duration
+
+    # ✅ 같은 사용자 개인석 중복 검사
+    overlap_personal = PersonalReservation.query.filter(
+        PersonalReservation.leader_id == leader_id,
+        PersonalReservation.date == date
+    ).all()
+
+    for p in overlap_personal:
+        p_start = int(p.hour)
+        p_end = p_start + int(p.duration or 1)
+        if not (end_hour <= p_start or start_hour >= p_end):
+            return render_template(
+                "error.html",
+                title="예약 불가",
+                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                back_url=url_for('index')
+            )
+
+    # ✅ 프로젝트실 1, 2 한정: 하루 총 3시간 제한
+    if room in ("1", "2"):
+        existing_by_user = Reservation.query.filter(
+            Reservation.room == room,
+            Reservation.date == date,
+            Reservation.leader_id == leader_id
+        ).all()
+
+        already_used = sum(int(r.duration or 1) for r in existing_by_user)
+
+        if already_used + duration > 3:
+            remaining = 3 - already_used
+            return render_template(
+                "group/simple_msg.html",
+                title="❌ 예약 불가",
+                message=f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.<br>"
+                        f"({date} 기준 이미 {already_used}시간 사용 중"
+                        + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)"),
+                back_url=f"/room_detail?room={room}"
+            )
+
+    # ✅ 단체실 내 중복 예약 검사
+    existing = Reservation.query.filter(
+        Reservation.room == room,
+        Reservation.date == date
+    ).all()
+
+    target_hours = set(range(hour, hour + duration))
+    for r in existing:
+        s = int(r.hour)
+        d = int(r.duration or 1)
+        exists_hours = set(range(s, s + d))
+        if target_hours & exists_hours:
+            return render_template(
+                "group/simple_msg.html",
+                title="❌ 예약 불가",
+                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
+                back_url=f"/room_detail?room={room}"
+            )
+
+    # ✅ DB 저장
+    new_resv = Reservation(
+        room=room,
+        date=date,
+        hour=str(hour),
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone,
+        total_people=1,
+        duration=duration
+    )
+    db.session.add(new_resv)
+    db.session.commit()
+
+    return render_template(
+        "group/simple_msg.html",
+        title="✅ 예약 완료",
+        message="예약이 성공적으로 완료되었습니다!",
+        back_url=f"/room_detail?room={room}"
+    )
 def hours_24():
     return list(range(24))
 
@@ -100,7 +296,6 @@ def reserve_group():
     date = request.form.get("date")
     hour = int(request.form.get("hour"))
     duration = int(request.form.get("duration", 1))
-
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
     leader_phone = request.form.get("leader_phone", "").strip()
@@ -117,7 +312,7 @@ def reserve_group():
     start_hour = hour
     end_hour = hour + duration
 
-    # ✅ 같은 사용자 개인석 중복 검사 (강화 버전)
+    # ✅ 같은 사용자 개인석 중복 검사
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
         PersonalReservation.date == date
@@ -126,13 +321,33 @@ def reserve_group():
     for p in overlap_personal:
         p_start = int(p.hour)
         p_end = p_start + int(p.duration or 1)
-        # 겹치거나 딱 맞닿는 경우까지 차단
         if not (end_hour <= p_start or start_hour >= p_end):
             return render_template(
                 "error.html",
                 title="예약 불가",
                 message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
                 back_url=url_for('index')
+            )
+
+    # ✅ 프로젝트실 1, 2 한정: 하루 총 3시간 제한
+    if room in ("1", "2"):
+        existing_by_user = Reservation.query.filter(
+            Reservation.room == room,
+            Reservation.date == date,
+            Reservation.leader_id == leader_id
+        ).all()
+
+        already_used = sum(int(r.duration or 1) for r in existing_by_user)
+
+        if already_used + duration > 3:
+            remaining = 3 - already_used
+            return render_template(
+                "group/simple_msg.html",
+                title="❌ 예약 불가",
+                message=f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.<br>"
+                        f"({date} 기준 이미 {already_used}시간 사용 중"
+                        + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)"),
+                back_url=f"/room_detail?room={room}"
             )
 
     # ✅ 단체실 내 중복 예약 검사
@@ -174,7 +389,6 @@ def reserve_group():
         message="예약이 성공적으로 완료되었습니다!",
         back_url=f"/room_detail?room={room}"
     )
-
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
