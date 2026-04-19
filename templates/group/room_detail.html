@@ -76,7 +76,6 @@
       text-align: center;
     }
 
-    /* 원래 배치도 유지 */
     .layout {
       display: flex;
       justify-content: center;
@@ -183,10 +182,23 @@
       letter-spacing: 1px;
     }
 
+    .notice-box {
+      width: 90%;
+      margin: 0 auto 16px;
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.8;
+      box-sizing: border-box;
+    }
+
     table {
       border-collapse: collapse;
       width: 90%;
-      margin: 30px auto 60px;
+      margin: 0 auto 60px;
       background: white;
       border-radius: 14px;
       overflow: hidden;
@@ -268,6 +280,13 @@
         </div>
         <div class="hallway">복도</div>
       </div>
+    </div>
+
+    <!-- ✅ 안내 문구 -->
+    <div class="notice-box">
+      📌 <strong>프로젝트실 이용 안내</strong><br>
+      • 1인당 하루 최대 <strong>3시간</strong>까지만 예약 가능합니다.<br>
+      • 종료 <strong>20분 전</strong>부터 뒷 예약이 없을 경우 연장 신청이 가능합니다.
     </div>
 
     <table>
