@@ -6,215 +6,19 @@ from db.models import Reservation, PersonalReservation
 
 app = create_app()
 KST = timezone(timedelta(hours=9))
+
 # ---------------- 유틸 ----------------
 def make_days(n=7):
     """✅ 오늘부터 n일치 날짜 리스트 생성 (한국 시간 기준)"""
     base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
     return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
-@app.route("/reserve", methods=["POST"])
-def reserve_group():
-    room = request.form.get("room")
-    date = request.form.get("date")
-    hour = int(request.form.get("hour"))
-    duration = int(request.form.get("duration", 1))
-    leader_name = request.form.get("leader_name", "").strip()
-    leader_id = request.form.get("leader_id", "").strip().upper()
-    leader_phone = request.form.get("leader_phone", "").strip()
 
-    # ✅ 입력 검증
-    if not leader_name or not leader_id or leader_name == leader_id:
-        return render_template(
-            "group/simple_msg.html",
-            title="❌ 예약 불가",
-            message="대표자 이름과 학번을 올바르게 입력해주세요.",
-            back_url=f"/room_detail?room={room}"
-        )
-
-    start_hour = hour
-    end_hour = hour + duration
-
-    # ✅ 같은 사용자 개인석 중복 검사
-    overlap_personal = PersonalReservation.query.filter(
-        PersonalReservation.leader_id == leader_id,
-        PersonalReservation.date == date
-    ).all()
-
-    for p in overlap_personal:
-        p_start = int(p.hour)
-        p_end = p_start + int(p.duration or 1)
-        if not (end_hour <= p_start or start_hour >= p_end):
-            return render_template(
-                "error.html",
-                title="예약 불가",
-                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                back_url=url_for('index')
-            )
-
-    # ✅ 프로젝트실 1, 2 한정: 하루 총 3시간 제한
-    if room in ("1", "2"):
-        existing_by_user = Reservation.query.filter(
-            Reservation.room == room,
-            Reservation.date == date,
-            Reservation.leader_id == leader_id
-        ).all()
-
-        already_used = sum(int(r.duration or 1) for r in existing_by_user)
-
-        if already_used + duration > 3:
-            remaining = 3 - already_used
-            return render_template(
-                "group/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.<br>"
-                        f"({date} 기준 이미 {already_used}시간 사용 중"
-                        + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)"),
-                back_url=f"/room_detail?room={room}"
-            )
-
-    # ✅ 단체실 내 중복 예약 검사
-    existing = Reservation.query.filter(
-        Reservation.room == room,
-        Reservation.date == date
-    ).all()
-
-    target_hours = set(range(hour, hour + duration))
-    for r in existing:
-        s = int(r.hour)
-        d = int(r.duration or 1)
-        exists_hours = set(range(s, s + d))
-        if target_hours & exists_hours:
-            return render_template(
-                "group/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
-                back_url=f"/room_detail?room={room}"
-            )
-
-    # ✅ DB 저장
-    new_resv = Reservation(
-        room=room,
-        date=date,
-        hour=str(hour),
-        leader_name=leader_name,
-        leader_id=leader_id,
-        leader_phone=leader_phone,
-        total_people=1,
-        duration=duration
-    )
-    db.session.add(new_resv)
-    db.session.commit()
-
-    return render_template(
-        "group/simple_msg.html",
-        title="✅ 예약 완료",
-        message="예약이 성공적으로 완료되었습니다!",
-        back_url=f"/room_detail?room={room}"
-    )@app.route("/reserve", methods=["POST"])
-def reserve_group():
-    room = request.form.get("room")
-    date = request.form.get("date")
-    hour = int(request.form.get("hour"))
-    duration = int(request.form.get("duration", 1))
-    leader_name = request.form.get("leader_name", "").strip()
-    leader_id = request.form.get("leader_id", "").strip().upper()
-    leader_phone = request.form.get("leader_phone", "").strip()
-
-    # ✅ 입력 검증
-    if not leader_name or not leader_id or leader_name == leader_id:
-        return render_template(
-            "group/simple_msg.html",
-            title="❌ 예약 불가",
-            message="대표자 이름과 학번을 올바르게 입력해주세요.",
-            back_url=f"/room_detail?room={room}"
-        )
-
-    start_hour = hour
-    end_hour = hour + duration
-
-    # ✅ 같은 사용자 개인석 중복 검사
-    overlap_personal = PersonalReservation.query.filter(
-        PersonalReservation.leader_id == leader_id,
-        PersonalReservation.date == date
-    ).all()
-
-    for p in overlap_personal:
-        p_start = int(p.hour)
-        p_end = p_start + int(p.duration or 1)
-        if not (end_hour <= p_start or start_hour >= p_end):
-            return render_template(
-                "error.html",
-                title="예약 불가",
-                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                back_url=url_for('index')
-            )
-
-    # ✅ 프로젝트실 1, 2 한정: 하루 총 3시간 제한
-    if room in ("1", "2"):
-        existing_by_user = Reservation.query.filter(
-            Reservation.room == room,
-            Reservation.date == date,
-            Reservation.leader_id == leader_id
-        ).all()
-
-        already_used = sum(int(r.duration or 1) for r in existing_by_user)
-
-        if already_used + duration > 3:
-            remaining = 3 - already_used
-            return render_template(
-                "group/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.<br>"
-                        f"({date} 기준 이미 {already_used}시간 사용 중"
-                        + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)"),
-                back_url=f"/room_detail?room={room}"
-            )
-
-    # ✅ 단체실 내 중복 예약 검사
-    existing = Reservation.query.filter(
-        Reservation.room == room,
-        Reservation.date == date
-    ).all()
-
-    target_hours = set(range(hour, hour + duration))
-    for r in existing:
-        s = int(r.hour)
-        d = int(r.duration or 1)
-        exists_hours = set(range(s, s + d))
-        if target_hours & exists_hours:
-            return render_template(
-                "group/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
-                back_url=f"/room_detail?room={room}"
-            )
-
-    # ✅ DB 저장
-    new_resv = Reservation(
-        room=room,
-        date=date,
-        hour=str(hour),
-        leader_name=leader_name,
-        leader_id=leader_id,
-        leader_phone=leader_phone,
-        total_people=1,
-        duration=duration
-    )
-    db.session.add(new_resv)
-    db.session.commit()
-
-    return render_template(
-        "group/simple_msg.html",
-        title="✅ 예약 완료",
-        message="예약이 성공적으로 완료되었습니다!",
-        back_url=f"/room_detail?room={room}"
-    )
 def hours_24():
     return list(range(24))
 
 def expand_hours(start_hour, duration):
     return [h for h in range(start_hour, start_hour + duration) if 0 <= h < 24]
 
-# ✅ flash 중복 방지 함수
 def safe_flash(message, category=None):
     session.pop('_flashes', None)
     if category:
@@ -228,7 +32,6 @@ def safe_flash(message, category=None):
 def index():
     return render_template("index.html")
 
-
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
@@ -236,7 +39,8 @@ def contact():
 @app.route("/hvac")
 def hvac():
     return render_template("hvac.html")
-    
+
+
 # -------------------------------
 # 🔹 단체석 예약 (Project Room)
 # -------------------------------
@@ -246,7 +50,6 @@ def room_detail():
     days = make_days(7)
     hours = hours_24()
 
-    # ✅ 이번 주(7일치) 데이터만 불러오기
     reservations = Reservation.query.filter(
         Reservation.room == room,
         Reservation.date.in_(days)
@@ -282,6 +85,7 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
+
 @app.route("/reserve_form")
 def reserve_form():
     room = request.args.get("room")
@@ -389,6 +193,8 @@ def reserve_group():
         message="예약이 성공적으로 완료되었습니다!",
         back_url=f"/room_detail?room={room}"
     )
+
+
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
@@ -427,6 +233,7 @@ def personal_detail():
         reserved=reserved,
         owners=owners
     )
+
 @app.route("/personal_all")
 def personal_all():
     days = make_days(3)
@@ -451,7 +258,6 @@ def personal_all():
         "personal/personal_all.html",
         days=days, hours=hours, seats=seats
     )
-
 
 @app.route("/personal_reserve_form")
 def personal_reserve_form():
@@ -482,7 +288,7 @@ def personal_reserve():
     start_hour = hour
     end_hour = hour + duration
 
-    # ✅ 같은 사용자 단체실 중복 검사 (강화 버전)
+    # ✅ 같은 사용자 단체실 중복 검사
     overlap_group = Reservation.query.filter(
         Reservation.leader_id == leader_id,
         Reservation.date == date
@@ -491,7 +297,6 @@ def personal_reserve():
     for g in overlap_group:
         g_start = int(g.hour)
         g_end = g_start + int(g.duration or 1)
-        # 겹치거나 딱 맞닿는 경우까지 차단
         if not (end_hour <= g_start or start_hour >= g_end):
             return render_template(
                 "error.html",
@@ -540,12 +345,12 @@ def personal_reserve():
         back_url=f"/personal_detail?seat={seat}"
     )
 
+
 # -------------------------------
 # 🔸 시간 연장 기능
 # -------------------------------
 @app.route("/extend_page", methods=["GET", "POST"])
 def extend_page():
-    """연장 페이지 — 종료 20분 전부터만 연장 가능 (1차 차단)"""
     now = datetime.now(KST)
     today = now.strftime("%Y-%m-%d")
 
@@ -553,7 +358,6 @@ def extend_page():
         name = request.form.get("leader_name", "").strip()
         sid = request.form.get("leader_id", "").strip().upper()
 
-        # 현재 시간대에 진행 중인 예약만 탐색
         group = Reservation.query.filter(
             Reservation.leader_name == name, Reservation.leader_id == sid,
             Reservation.date == today,
@@ -573,7 +377,6 @@ def extend_page():
             safe_flash("금일 연장 가능한 예약이 없습니다.<br>예약 종료 20분 전부터만 연장이 가능합니다.")
             return redirect(url_for("extend_page"))
 
-        # ✅ 종료 시각 계산
         start_hour = int(res.hour)
         start_dt = datetime.strptime(
             f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M"
@@ -581,15 +384,12 @@ def extend_page():
         end_dt = start_dt + timedelta(hours=int(res.duration))
         remaining = int((end_dt - now).total_seconds() // 60)
 
-        # 디버깅 로그
         print(f"[extend_page] now={now}, start_dt={start_dt}, end_dt={end_dt}, remaining(min)={remaining}")
 
-        # ✅ 20분 전이 아니면 연장 불가 (1차 차단)
         if remaining > 20:
             safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
             return redirect(url_for("extend_page"))
 
-        # 경과 시간 표시
         elapsed = now - start_dt
         elapsed_str = f"{elapsed.seconds // 3600}시간 {(elapsed.seconds % 3600) // 60}분"
 
@@ -597,21 +397,14 @@ def extend_page():
         return render_template("extend_confirm.html", res=res, res_type=res_type, elapsed=elapsed_str)
 
     return render_template("extend_page.html")
-    
+
+
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
-    """
-    단체/개인 공통 연장 처리:
-    - 20분 제한 2차 차단(직접 호출/우회 방지)
-    - 23→00 자정 넘김 처리 (기존 예약 유지)
-    - 뒤 시간대 겹침 검증
-    - 성공 시 extend_success.html / 실패 시 extend_blocked.html
-    """
-    res_type = request.form.get("res_type")          # "group" or "personal"
-    res_id = request.form.get("res_id", type=int)    # 예약 PK
+    res_type = request.form.get("res_type")
+    res_id = request.form.get("res_id", type=int)
     extend_hours = int(request.form.get("extend_hours", 0))
 
-    # 모델 선택 및 조회
     Model = Reservation if res_type == "group" else PersonalReservation
     reservation = Model.query.filter_by(id=res_id).first()
     if not reservation:
@@ -620,7 +413,6 @@ def extend_confirm():
 
     now = datetime.now(KST)
 
-    # 현재 예약의 시작/종료, 남은 시간 계산
     start_hour = int(reservation.hour)
     duration = int(reservation.duration)
     start_dt = datetime.strptime(
@@ -629,21 +421,17 @@ def extend_confirm():
     end_dt = start_dt + timedelta(hours=duration)
     remaining = int((end_dt - now).total_seconds() // 60)
 
-    # 디버깅 로그
     print(f"[extend_confirm] now={now}, start_dt={start_dt}, end_dt={end_dt}, remaining(min)={remaining}")
 
-    # ✅ 20분 제한 (2차 차단: 직접 POST 우회 방지)
     if remaining > 20:
         safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
         return redirect(url_for("extend_page"))
 
-    # 연장 구간 (end_dt ~ end_dt + extend_hours)
     new_start_hour = end_dt.hour
     new_end_dt = end_dt + timedelta(hours=extend_hours)
     new_date = new_end_dt.strftime("%Y-%m-%d")
     old_date = reservation.date
 
-    # 겹침 검사 함수
     def has_overlap(model, date_str, start_h, dur):
         if model is Reservation:
             q = model.query.filter(
@@ -667,22 +455,17 @@ def extend_confirm():
         safe_flash("연장 시간이 올바르지 않습니다.")
         return redirect(url_for("extend_page"))
 
-    # 자정 넘김 여부
     crosses_midnight = (new_date != old_date) and (new_start_hour < start_hour)
-
-    # 겹침 검사 대상
     check_date = old_date if not crosses_midnight else new_date
     check_start_hour = new_start_hour
     check_duration = extend_hours
 
-    # 겹침 있으면 차단
     if has_overlap(Model, check_date, check_start_hour, check_duration):
         return render_template(
             "extend_blocked.html",
             message="⚠️ 연장 불가: 뒤 시간대에 이미 예약이 있습니다."
         )
 
-    # DB 업데이트 (기존 예약 유지)
     if crosses_midnight:
         reservation.date = new_date
         reservation.duration = duration + extend_hours
@@ -713,7 +496,6 @@ def cancel_all():
         safe_flash("⚠️ 이름, 학번, 전화번호를 모두 입력해주세요.")
         return redirect(url_for("cancel_all"))
 
-    # ✅ 오늘 이후 예약 + 오늘 남은 시간 예약만 조회
     group_reservations = Reservation.query.filter(
         Reservation.leader_name == leader_name,
         Reservation.leader_id == leader_id,
@@ -753,6 +535,7 @@ def cancel_all():
         leader_id=leader_id,
         leader_phone=leader_phone
     )
+
 
 @app.route("/cancel_all_confirm", methods=["POST"])
 def cancel_all_confirm():
@@ -801,7 +584,6 @@ def cancel_all_confirm():
 
     for item in selected_items:
         try:
-            # value 형식: "group:3" 또는 "personal:7"
             type_, id_str = item.split(":", 1)
             target_id = int(id_str)
 
@@ -834,7 +616,6 @@ def cancel_all_confirm():
     else:
         safe_flash("⚠️ 선택된 예약을 찾을 수 없거나 이미 삭제되었습니다.")
 
-    # ✅ 삭제 후에도 앞으로 남은 예약만 다시 조회
     group_reservations = Reservation.query.filter(
         Reservation.leader_name == leader_name,
         Reservation.leader_id == leader_id,
@@ -864,9 +645,11 @@ def cancel_all_confirm():
         leader_phone=leader_phone
     )
 
+
 @app.route("/cancel_all_result")
 def cancel_all_result():
     return render_template("cancel_all_result.html")
+
 
 # ---------------- 실행 ----------------
 if __name__ == "__main__":
