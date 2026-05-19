@@ -94,6 +94,7 @@ def reserve_form():
     return render_template("group/reserve_form.html", room=room, date=date, hour=hour)
 
 @app.route("/reserve", methods=["POST"])
+@app.route("/reserve", methods=["POST"])
 def reserve_group():
     room = request.form.get("room")
     date = request.form.get("date")
@@ -123,12 +124,13 @@ def reserve_group():
     for p in overlap_personal:
         p_start = int(p.hour)
         p_end = p_start + int(p.duration or 1)
+
         if not (end_hour <= p_start or start_hour >= p_end):
             return render_template(
                 "error.html",
                 title="예약 불가",
                 message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.\n프로젝트실 예약은 중복 불가합니다.",
-                back_url=url_for('index')
+                back_url=url_for("index")
             )
 
     if room in ("1", "2"):
@@ -142,6 +144,7 @@ def reserve_group():
 
         if already_used + duration > 3:
             remaining = 3 - already_used
+
             return render_template(
                 "group/simple_msg.html",
                 title="❌ 예약 불가",
@@ -163,6 +166,7 @@ def reserve_group():
     for r in existing:
         s = int(r.hour)
         d = int(r.duration or 1)
+
         exists_hours = set(range(s, s + d))
 
         if target_hours & exists_hours:
@@ -174,14 +178,17 @@ def reserve_group():
             )
 
     try:
-        db.session.execute(text("""
-            SELECT setval(
-                pg_get_serial_sequence('reservations', 'id'),
-                COALESCE((SELECT MAX(id) FROM reservations), 1),
-                true
-            );
-        """))
+        # ✅ postgres sequence 동기화
+        if db.engine.dialect.name == "postgresql":
+            db.session.execute(text("""
+                SELECT setval(
+                    pg_get_serial_sequence('reservations', 'id'),
+                    COALESCE((SELECT MAX(id) FROM reservations), 1),
+                    true
+                );
+            """))
 
+        # ✅ DB 저장
         new_resv = Reservation(
             room=room,
             date=date,
@@ -199,10 +206,11 @@ def reserve_group():
     except Exception as e:
         db.session.rollback()
         print("❌ reserve_group DB error:", e)
+
         return render_template(
             "group/simple_msg.html",
             title="❌ 서버 오류",
-            message="예약 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+            message="예약 저장 중 오류가 발생했습니다.",
             back_url=f"/room_detail?room={room}"
         )
 
@@ -212,7 +220,6 @@ def reserve_group():
         message="예약이 성공적으로 완료되었습니다!",
         back_url=f"/room_detail?room={room}"
     )
-
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
