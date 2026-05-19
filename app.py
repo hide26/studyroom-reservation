@@ -93,18 +93,17 @@ def reserve_form():
     hour = int(request.args.get("hour"))
     return render_template("group/reserve_form.html", room=room, date=date, hour=hour)
 
-
 @app.route("/reserve", methods=["POST"])
 def reserve_group():
     room = request.form.get("room")
     date = request.form.get("date")
     hour = int(request.form.get("hour"))
     duration = int(request.form.get("duration", 1))
+
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
     leader_phone = request.form.get("leader_phone", "").strip()
 
-    # ✅ 입력 검증
     if not leader_name or not leader_id or leader_name == leader_id:
         return render_template(
             "group/simple_msg.html",
@@ -116,7 +115,6 @@ def reserve_group():
     start_hour = hour
     end_hour = hour + duration
 
-    # ✅ 같은 사용자 개인석 중복 검사
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
         PersonalReservation.date == date
@@ -129,11 +127,10 @@ def reserve_group():
             return render_template(
                 "error.html",
                 title="예약 불가",
-                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.\n프로젝트실 예약은 중복 불가합니다.",
                 back_url=url_for('index')
             )
 
-    # ✅ 프로젝트실 1, 2 한정: 하루 총 3시간 제한
     if room in ("1", "2"):
         existing_by_user = Reservation.query.filter(
             Reservation.room == room,
@@ -148,23 +145,26 @@ def reserve_group():
             return render_template(
                 "group/simple_msg.html",
                 title="❌ 예약 불가",
-                message=f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.<br>"
-                        f"({date} 기준 이미 {already_used}시간 사용 중"
-                        + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)"),
+                message=(
+                    f"프로젝트실은 하루 최대 3시간까지만 예약 가능합니다.\n"
+                    f"({date} 기준 이미 {already_used}시간 사용 중"
+                    + (f", {remaining}시간 남음)" if remaining > 0 else ", 추가 예약 불가)")
+                ),
                 back_url=f"/room_detail?room={room}"
             )
 
-    # ✅ 단체실 내 중복 예약 검사
     existing = Reservation.query.filter(
         Reservation.room == room,
         Reservation.date == date
     ).all()
 
     target_hours = set(range(hour, hour + duration))
+
     for r in existing:
         s = int(r.hour)
         d = int(r.duration or 1)
         exists_hours = set(range(s, s + d))
+
         if target_hours & exists_hours:
             return render_template(
                 "group/simple_msg.html",
@@ -173,19 +173,38 @@ def reserve_group():
                 back_url=f"/room_detail?room={room}"
             )
 
-    # ✅ DB 저장
-    new_resv = Reservation(
-        room=room,
-        date=date,
-        hour=str(hour),
-        leader_name=leader_name,
-        leader_id=leader_id,
-        leader_phone=leader_phone,
-        total_people=1,
-        duration=duration
-    )
-    db.session.add(new_resv)
-    db.session.commit()
+    try:
+        db.session.execute(text("""
+            SELECT setval(
+                pg_get_serial_sequence('reservations', 'id'),
+                COALESCE((SELECT MAX(id) FROM reservations), 1),
+                true
+            );
+        """))
+
+        new_resv = Reservation(
+            room=room,
+            date=date,
+            hour=str(hour),
+            leader_name=leader_name,
+            leader_id=leader_id,
+            leader_phone=leader_phone,
+            total_people=1,
+            duration=duration
+        )
+
+        db.session.add(new_resv)
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("❌ reserve_group DB error:", e)
+        return render_template(
+            "group/simple_msg.html",
+            title="❌ 서버 오류",
+            message="예약 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+            back_url=f"/room_detail?room={room}"
+        )
 
     return render_template(
         "group/simple_msg.html",
@@ -193,7 +212,6 @@ def reserve_group():
         message="예약이 성공적으로 완료되었습니다!",
         back_url=f"/room_detail?room={room}"
     )
-
 
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
