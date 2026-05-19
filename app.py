@@ -674,6 +674,17 @@ def cancel_all_confirm():
 @app.route("/cancel_all_result")
 def cancel_all_result():
     return render_template("cancel_all_result.html")
+@app.route("/fix-sequence-now")
+def fix_sequence_now():
+    db.session.execute(text("""
+        SELECT setval(
+            'reservations_id_seq',
+            (SELECT COALESCE(MAX(id), 1) FROM reservations),
+            true
+        );
+    """))
+    db.session.commit()
+    return "reservations sequence fixed"
 
 
 # ---------------- 실행 ----------------
