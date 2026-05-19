@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import cast, Integer
+from sqlalchemy import cast, Integer,text
 from db import create_app, db
 from db.models import Reservation, PersonalReservation
 
